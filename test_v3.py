@@ -1,10 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import channel_modelling_3GPP as cm
-import bestresponsev3_aug25 as br
+import bestresponsev4_aug25 as br
+import pandas as pd
 
-eta = np.float64(1)
-epsilon = np.float64(1e-20)
+eta = np.float64(1.0)
+epsilon = np.float64(1e-50)
 N = 5
 max_iteration = 100
 receiver_coordinates = (0, 0, 0)
@@ -15,9 +16,9 @@ transmitter_coordinates = [
     (21.0, 10.5, 4.5),
     (25.5, 12.0, 5.25)
 ]
-P_max = np.array([1.0, 1.0, 1.0, 1.0, 1.0])
+P_max = np.array([np.float64(1.0), np.float64(1.0), np.float64(1.0), np.float64(1.0), np.float64(1.0)])
 
-P = np.random.uniform(0.1, 1, N)  # random initial power
+P = np.float64(np.random.uniform(0.1, 1, N))  # random initial power
 h = np.array([cm.get_channel_gain(tx, receiver_coordinates, 2405e6) for tx in transmitter_coordinates])
 
 print("Channel gain values are:", h)
@@ -30,6 +31,14 @@ c_star, utility_histories, power_histories, df = br.adaptive_best_response(
 if c_star is None:
     print("No feasible c_min found")
     exit()
+
+# Set pandas display options to show all decimal places
+pd.set_option('display.float_format', lambda x: '%.40f' % x)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', None)
+print(df)
+
+P = df["Final Power P*"]
 
 # ----- Plot Utility Behaviour -----
 plt.figure(figsize=(10, 6))
@@ -55,4 +64,23 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 
-print(df)
+
+# mse = np.sum(np.power(h*np.sqrt(P)/np.sqrt(eta)-1, 2))/np.power(N,2)
+# print(f"MSE: {mse}")
+# print(h*np.sqrt(P)/np.sqrt(eta)-1)
+
+for i in range(N):
+    me = h[i]*np.sqrt(P[i])/np.sqrt(eta)
+    other = np.sum(h*np.sqrt(P)/np.sqrt(eta)) - me
+    print(f"NODE {i}: {me}, {other}")
+    print(np.exp(2*other)/(4*100000))
+
+
+
+
+
+
+
+
+
+print(np.exp(h*np.sqrt(P)/np.sqrt(eta))/(4*100000))
