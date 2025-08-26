@@ -31,7 +31,7 @@ def closed_form_p_star(P, h, c_max, eta, P_max_vec):
 
 def adaptive_best_response(P: npt.NDArray[np.float64], h: npt.NDArray[np.float64], eta: float, epsilon: float, P_max: npt.NDArray[np.float64], max_iteration: int = 1000):
     h1, h2 = np.sort(h)[-2:]
-    c_max = eta / (4 * h1 * h2)
+    c_max = 6.586e+11 #eta / (4 * h1 * h2)
     print("Starting c_max:", c_max)
 
     P_max_vec = np.ones(len(P)) * P_max

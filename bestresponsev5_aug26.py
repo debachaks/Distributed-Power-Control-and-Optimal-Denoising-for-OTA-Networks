@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
 import numpy.typing as npt
+from scipy.optimize import minimize
 
-# Synchronous Best Response Implementation
+# Asynchronous Best Response Implementation
 # Using different payoff function
 
 def utility_vector(P: npt.NDArray[np.float64], h: npt.NDArray[np.float64], c: np.float64, eta: np.float64):
@@ -17,12 +18,15 @@ def utility_vector(P: npt.NDArray[np.float64], h: npt.NDArray[np.float64], c: np
 
 
 def closed_form_p_star(h: npt.NDArray[np.float64], c: np.float64, eta: np.float64, P_max: npt.NDArray[np.float64]):
-    sum1 = np.sum(h * np.sqrt(P_max)/np.sqrt(eta))
-    P_star = np.zeros(len(P_max))
-    for i in range(len(P_max)):
-        me = h[i] * np.sqrt(P_star[i]) / np.sqrt(eta)
-        other = sum1 - me
-        P_star[i] = np.power( np.sqrt(eta) * np.exp(other)/ (2 * c * h[i]), 2)
+    # sum1 = np.sum(h * np.sqrt(P_max)/np.sqrt(eta))
+    # P_star = np.zeros(len(P_max))
+    # for i in range(len(P_max)):
+    #     me = h[i] * np.sqrt(P_star[i]) / np.sqrt(eta)
+    #     other = sum1 - me
+    #     P_star[i] = eta * np.exp(2*other)/ (4 * np.power(c, 2) * np.power(h[i], 2))
+
+    P_init = P_max.copy()
+    P_star = minimize(lambda x: -utility_vector(x, h, c, eta), P_init, method='BFGS')
     P_star = np.clip(P_star, 0, P_max)
     return P_star
 
@@ -31,8 +35,8 @@ def get_best_c(h: npt.NDArray[np.float64], P_max: npt.NDArray[np.float64], eta: 
     pass
 
 
-def adaptive_best_response(P: npt.NDArray[np.float64], h: npt.NDArray[np.float64], eta: np.float64, epsilon: np.float64, P_max: npt.NDArray[np.float64], max_iteration: int = 1000):
-    c = np.float64(10000000)
+def adaptive_best_response(P: npt.NDArray[np.float64], h: npt.NDArray[np.float64], eta: np.float64, epsilon: np.float64, P_max: npt.NDArray[np.float64], max_iteration: int = 1000, c_init: np.float64 = 10000000):
+    c = np.float64(c_init)
     print("Starting c:", c)
 
     found = False
@@ -53,15 +57,13 @@ def adaptive_best_response(P: npt.NDArray[np.float64], h: npt.NDArray[np.float64
 
         while convergence == 0:
             iteration += 1
-            print(f"Iteration {iteration}:")
         
             P_new = P_current.copy()
             for i in range(len(P_new)):
                 sum1 = np.sum(h * np.sqrt(P_new)/np.sqrt(eta))
                 me = h[i] * np.sqrt(P_new[i]) / np.sqrt(eta)
                 other = sum1 - me
-                P_new[i] = np.power(np.sqrt(eta) * np.exp(other) / (2 * c * h[i]), 2)
-                print(P_new)
+                P_new[i] = eta * np.exp(2*other)/ (4 * np.power(c, 2) * np.power(h[i], 2))
             
             P_new = np.clip(P_new, 0, P_max)
             utility_history.append(utility_vector(P_new, h, c, eta))
@@ -77,10 +79,7 @@ def adaptive_best_response(P: npt.NDArray[np.float64], h: npt.NDArray[np.float64
                 stop_due_to_max = True
                 break
             
-            print(f"Iteration {iteration}:")
-            print("Difference:", np.abs(utility_history[-1] - utility_history[-2]))
-            
-            if np.all(np.abs(utility_history[-1] - utility_history[-2]) < epsilon) or iteration == max_iteration:
+            if iteration == max_iteration or np.all(np.abs(utility_history[-1] - utility_history[-2]) < epsilon):
                 convergence = 1
             else:
                 P_current = P_new
