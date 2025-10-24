@@ -341,7 +341,7 @@ for i in range(N):
 
 
 #c = np.float64(80022291587.0)
-c = np.float64(200000.0)
+c = np.float64(140000.0)
 #c = compute_c_bounds(h, P_max, np.float64(10e-10))
 print(c)
 
@@ -448,7 +448,7 @@ for N in N_values:
     for i in range(N):
         h[i] = get_channel_gain(transmitter_coordinates[i], receiver_coordinates, 2405 * 10**6)
 
-    c = np.float64(200000.0)
+    c = np.float64(140000.0)
 
     _, _, _, mse_history, _ = adaptive_eta_best_response(
         h=h,
@@ -494,7 +494,7 @@ for N in N_values:
     for i in range(N):
         h[i] = get_channel_gain(transmitter_coordinates[i], receiver_coordinates, 2405 * 10**6)
 
-    c = np.float64(200000.0)
+    c = np.float64(140000.0)
 
     start_time = time.time()
     df, power_outer_history, utility_outer_history, mse_history, eta_history = adaptive_eta_best_response(
@@ -538,7 +538,7 @@ for N in N_values:
     EXP_POWER_UTILITY = 1
     d_max = 100.0
     P_max = np.ones(N).astype(np.float64)
-    c = np.float64(200000.0)
+    c = np.float64(140000.0)
 
     # Store runtimes for each Monte Carlo trial
     monte_carlo_times = []
@@ -610,7 +610,7 @@ for N in N_values:
     EXP_POWER_UTILITY = 1
     d_max = 100.0
     P_max = np.ones(N).astype(np.float64)
-    c = np.float64(200000.0)
+    c = np.float64(140000.0)
     receiver_coordinates = (0.0, 0.0, 0.0)
     x_positions = np.linspace(d_max / N, d_max, N)
     transmitter_coordinates = [(np.float64(x), 0.0, 0.0) for x in x_positions]
