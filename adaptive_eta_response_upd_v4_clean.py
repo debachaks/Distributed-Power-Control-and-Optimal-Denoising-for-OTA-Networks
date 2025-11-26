@@ -1368,7 +1368,7 @@ plt.show()
 from scipy.optimize import minimize
 import numpy as np
 
-def centralized_utility_solution_joint(h, c, P_max, eta_bounds=(1e-20, 1e20)):
+def centralized_utility_solution_joint(h, c, P_max, eta_bounds=(1e-125, 1e125)):
     """
     Jointly maximizes total utility over P and eta.
     """
@@ -1385,7 +1385,7 @@ def centralized_utility_solution_joint(h, c, P_max, eta_bounds=(1e-20, 1e20)):
     bounds = [(0, P_max[i]) for i in range(n)] + [eta_bounds]
 
     # Initial guess: half of max power and eta=1
-    x0 = np.concatenate([np.array(P_max) / 2, [1.0]])
+    x0 = np.concatenate([np.array(P_max), [1.0]])
 
     # Optimization using L-BFGS-B
     res = minimize(objective, x0, bounds=bounds, method="L-BFGS-B")
@@ -1416,7 +1416,7 @@ def centralized_mse_solution(h, eta, P_max):
 from scipy.optimize import minimize
 import numpy as np
 
-def centralized_mse_solution_joint(h, P_max, eta_bounds=(1e-20, 1e20)):
+def centralized_mse_solution_joint(h, P_max, eta_bounds=(1e-125, 1e125)):
 
     h = np.array(h, dtype=np.float64)
     n = len(h)
@@ -1433,7 +1433,7 @@ def centralized_mse_solution_joint(h, P_max, eta_bounds=(1e-20, 1e20)):
 
     # Initial guess: P = half max power, eta = average scaled value
     eta_init = np.mean((np.array(P_max)/2) * (h**2))
-    x0 = np.concatenate([np.array(P_max)/2, [eta_init]])
+    x0 = np.concatenate([np.array(P_max), [eta_init]])
 
     # Optimization (L-BFGS-B handles box constraints smoothly)
     res = minimize(objective, x0, bounds=bounds, method="L-BFGS-B")
